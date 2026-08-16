@@ -179,7 +179,7 @@ revxlp42-choc-settings-reset:
 all: mriya46-mx mriya46-choc revxlp42-choc
 
 clean:
-	rm -rf $(BUILD_DIR)/build_* $(FIRMWARE_DIR)
+	rm -rf $(BUILD_DIR)/build_* $(BUILD_DIR)/config_* $(FIRMWARE_DIR)
 
 distclean:
 	rm -rf $(BUILD_DIR) $(FIRMWARE_DIR)
