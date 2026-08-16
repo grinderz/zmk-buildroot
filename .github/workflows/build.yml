@@ -1,0 +1,43 @@
+name: build
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      zmk_rev:
+        description: "ZMK revision override (tag/branch/sha), empty = pinned in west.yml"
+        required: false
+        default: ""
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container: zmkfirmware/zmk-build-arm:stable
+    strategy:
+      fail-fast: false
+      matrix:
+        keyboard: [mriya46-mx, mriya46-choc, revxlp42-choc]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Mark workspace safe for git
+        run: git config --global --add safe.directory '*'
+
+      - name: Cache west workspace
+        uses: actions/cache@v4
+        with:
+          path: build
+          key: west-${{ matrix.keyboard }}-${{ inputs.zmk_rev || 'pinned' }}-${{ hashFiles(format('{0}/config/west.yml', matrix.keyboard)) }}
+
+      - name: Build
+        run: make ${{ matrix.keyboard }} DOCKER=0 ZMK_REV="${{ inputs.zmk_rev }}" PRISTINE=1
+
+      - name: Upload firmware
+        uses: actions/upload-artifact@v4
+        with:
+          name: firmware-${{ matrix.keyboard }}
+          path: firmware/*

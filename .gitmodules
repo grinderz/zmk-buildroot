@@ -1,0 +1,12 @@
+[submodule "mriya46-mx"]
+	path = mriya46-mx
+	url = git@github.com:grinderz/mriya-zmk-config.git
+	branch = mriya46-mx
+[submodule "mriya46-choc"]
+	path = mriya46-choc
+	url = git@github.com:grinderz/mriya-zmk-config.git
+	branch = mriya46-choc
+[submodule "revxlp42-choc"]
+	path = revxlp42-choc
+	url = git@github.com:grinderz/revxlp-zmk-config.git
+	branch = revxlp42-choc
