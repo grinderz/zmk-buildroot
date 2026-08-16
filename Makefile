@@ -15,6 +15,10 @@
 ZMK_REV ?=
 DOCKER ?= 1
 DOCKER_IMAGE ?= zmkfirmware/zmk-build-arm:stable
+# Build workspace. Default is ./build; override via environment, e.g. the
+# (gitignored) .envrc points it at ~/.unbacked so the heavy rebuildable
+# workspace stays out of btrfs snapshots and backups. Inside the build
+# container the directory is bind-mounted at /build.
 BUILD_DIR ?= build
 FIRMWARE_DIR ?= firmware
 CMAKE_ARGS ?=
@@ -56,12 +60,13 @@ ifeq ($(DOCKER),1)
 # Starts the docker daemon first if it is not running.
 define zmk_build
 	@docker info >/dev/null 2>&1 || sudo systemctl start docker
+	mkdir -p $(BUILD_DIR)
 	docker run --rm \
-		-v $(CURDIR):/work -w /work \
+		-v $(CURDIR):/work -v $(abspath $(BUILD_DIR)):/build -w /work \
 		-e HOME=/tmp \
 		--user $(shell id -u):$(shell id -g) \
 		$(DOCKER_IMAGE) \
-		make $@ DOCKER=0 ZMK_REV="$(ZMK_REV)" PRISTINE="$(PRISTINE)" CMAKE_ARGS="$(CMAKE_ARGS)" WEST_UPDATE_ARGS="$(WEST_UPDATE_ARGS)"
+		make $@ DOCKER=0 BUILD_DIR=/build ZMK_REV="$(ZMK_REV)" PRISTINE="$(PRISTINE)" CMAKE_ARGS="$(CMAKE_ARGS)" WEST_UPDATE_ARGS="$(WEST_UPDATE_ARGS)"
 endef
 
 else
@@ -83,7 +88,7 @@ define zmk_build
 	cp -a $(1)/config $(BUILD_DIR)/config_$(2)
 	$(if $(7),rm -rf $(BUILD_DIR)/config_$(2)/boards)
 	cd $(BUILD_DIR) && west build -s zmk/app -p $(if $(PRISTINE),always,auto) -d build_$(2) -b $(3) $(if $(5),-S $(5)) -- \
-		-DZMK_CONFIG=$(CURDIR)/$(BUILD_DIR)/config_$(2) $(if $(4),-DSHIELD="$(4)") $(CMAKE_ARGS) $(6)
+		-DZMK_CONFIG=$(abspath $(BUILD_DIR))/config_$(2) $(if $(4),-DSHIELD="$(4)") $(CMAKE_ARGS) $(6)
 	if [ -f $(BUILD_DIR)/build_$(2)/zephyr/zmk.uf2 ]; then \
 		cp $(BUILD_DIR)/build_$(2)/zephyr/zmk.uf2 $(FIRMWARE_DIR)/$(2).uf2; \
 	else \
