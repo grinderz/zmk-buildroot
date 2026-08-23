@@ -243,3 +243,31 @@ flash-mriya46-choc-right:
 
 flash-mriya46-choc-left-studio:
 	$(call uf2_flash,mriya46_choc_left_studio,$(MRIYA_LABELS))
+
+# ---------------------------------------------------------------------- push
+
+# make push MSG="feat: ..."      commit and push every dirty submodule on its
+#                                .gitmodules branch with the same message
+# make push-all MSG="feat: ..."  also commit the updated submodule pointers
+#                                in this repo with that message and push
+SUBMODULES := mriya46-mx mriya46-choc revxlp42-choc
+MSG ?=
+
+.PHONY: push push-all
+
+push:
+	@[ -n "$(MSG)" ] || { echo 'usage: make push MSG="commit message"'; exit 1; }
+	@for s in $(SUBMODULES); do \
+		branch=$$(git config -f .gitmodules submodule.$$s.branch); \
+		git -C $$s checkout -q $$branch || exit 1; \
+		if git -C $$s diff --quiet && git -C $$s diff --cached --quiet; then \
+			echo "$$s: clean, skipping"; continue; fi; \
+		git -C $$s add -u && git -C $$s commit -q -m "$(MSG)" && \
+		git -C $$s push -q origin $$branch && \
+		echo "$$s: pushed $$(git -C $$s rev-parse --short HEAD) to $$branch" || exit 1; \
+	done
+
+push-all: push
+	@git add $(SUBMODULES) && \
+	if git diff --cached --quiet; then echo "root: nothing to commit"; \
+	else git commit -q -m "$(MSG)" && git push -q && echo "root: pushed"; fi
