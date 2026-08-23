@@ -30,46 +30,66 @@ keymap-editor JSON, board/shield), `build.yaml`, and its own
 The keymap is identical on every keyboard (shared 42-key grid; the four extra
 Mriya keys — top-row corners and outer thumbs — are all empty). Legend: `.` =
 empty, `_` = transparent (falls through), `s` suffix = sticky modifier,
-`L1`-`L4` = momentary layer, `X/Y` = hold for modifier X (G=GUI, A=Alt),
-tap for Y.
+`L1`-`L4` = momentary layer, `X/Y` = hold for modifier X (G=GUI, A=Alt,
+C=Ctrl), tap for Y.
 
-**Base** — default layer
+The outer columns are transparent on Symbol, Extend and Number, so the base
+modifiers, Backspace and Tab keep working inside those layers regardless of
+press order (`Ctrl+arrow`, `Alt+hjkl`, `GUI+digit`, …). On Control they are
+empty on purpose.
 
-```text
-.     Q     W     E     R     T       Y     U     I     O     P     .
-.     A     S     D     F     G       H     J     K     L     '     .
-.     Z     X     C     V     B       N     M     ,     .     ;     .
-                  L2    SPC   A/ENT   G/`   RSHFT L1
-```
-
-**Symbol** — hold right outer thumb (L1)
-
-```text
-.     .     [     {     (     ~       ^     )     }     ]     `     .
-.     -     *     =     _     $       #     SFTs  CTLs  ALTs  GUIs  .
-.     +     |     @     /     %       .     \     &     ?     !     .
-                  L3    _     _       _     L4    _
-```
-
-**Extend** — hold left outer thumb (L2)
+**Base** — default layer. Every modifier is reachable from both hands:
+Ctrl — left pinky, left thumb, right pinky; Alt — left pinky, right thumb;
+GUI — left pinky, right thumb. Tap CAPS toggles the xkb layout
+(`grp:caps_toggle`), `[` is `х` in the Russian layout, `` ` `` on the thumb
+is `ё` and the zellij lock/unlock key.
 
 ```text
-.     CAPS  PLAY  VOL-  VOL+  .       HOME  PGDN  PGUP  END   .     .
-.     GUIs  ALTs  CTLs  SFTs  .       LEFT  DOWN  UP    RGHT  BKSP  .
-.     ESC   .     .     TAB   REP     REP   .     .     .     DEL   .
-                  _     L4    _       _     _     L3
+A/ESC  Q     W     E     R     T       Y     U     I     O     P     BSPC
+C/CAPS A     S     D     F     G       H     J     K     L     '     [
+LGUI   Z     X     C     V     B       N     M     ,     .     ;     C/TAB
+                   L2    C/SPC G/ENT   A/`   RSHFT L1
 ```
 
-**Number** — L1 or L2 + opposite outer thumb (L3)
+**Symbol** — hold right outer thumb (L1). Bracket pairs mirror across the
+hands; `:` and `"` complete the base-layer `;` and `'`. The sticky modifiers
+on the right home row are for chords where the thumbs collide, e.g.
+`$mod+Shift+minus` = `LGUI` + L1 + tap `J` + `A`.
 
 ```text
-.     7     5     3     1     9       8     0     2     4     6     .
-.     GUIs  ALTs  CTLs  SFTs  F11     F12   SFTs  CTLs  ALTs  GUIs  .
-.     F7    F5    F3    F1    F9      F8    F10   F2    F4    F6    .
-                  _     _     _       _     _     _
+_     <     [     {     (     ~       ^     )     }     ]     >     _
+_     -     *     =     _     $       #     SFTs  CTLs  ALTs  GUIs  "
+_     +     |     @     /     %       :     \     &     ?     !     _
+                  L3    _     _       _     _     _
 ```
 
-**Control** — L1 or L2 + adjacent thumb (L4)
+**Extend** — hold left outer thumb (L2). Vim-style arrows with HOME/PGDN/PGUP/END
+above them; the media and brightness keys match the sway `XF86*` bindings.
+ESC/TAB/BKSP duplicate the base keys but auto-repeat when held (the base ones
+are mod-taps).
+
+```text
+_     MUTE  PLAY  VOL-  VOL+  BRI+    HOME  PGDN  PGUP  END   .     _
+_     GUIs  ALTs  CTLs  SFTs  BRI-    LEFT  DOWN  UP    RGHT  BKSP  _
+_     ESC   PREV  NEXT  TAB   REP     REP   .     .     .     DEL   _
+                  _     _     _       _     _     L3
+```
+
+**Number** — L1 + left outer thumb, or L2 + right outer thumb (L3). Odd digits
+on the left, even on the right (sway pins odd workspaces to the left monitor);
+F-keys sit under their digits. `. , - :` on the right home row cover IPs,
+versions, dates and times without leaving the layer; Shift comes from the free
+right thumb.
+
+```text
+_     7     5     3     1     9       8     0     2     4     6     _
+_     GUIs  ALTs  CTLs  SFTs  F11     F12   .     ,     -     :     _
+_     F7    F5    F3    F1    F9      F8    F10   F2    F4    F6    _
+                  _     _     L4      _     _     _
+```
+
+**Control** — Number + the G/ENT thumb (L4), i.e. both outer thumbs + left
+inner thumb. Deliberately awkward so it never fires by accident.
 
 ```text
 .     CLR   .     .     .     BOOT    BOOT  .     .     .     CLR   .
@@ -77,6 +97,17 @@ tap for Y.
 .     STU   .     .     .     RST     RST   .     .     .     STU   .
                   .     .     .       .     .     .
 ```
+
+Mod-taps use `tap-preferred`, 200 ms tapping term and
+`require-prior-idle-ms = 125` — a key pressed within 125 ms after another key
+is always a tap, so fast typing never produces a stray modifier. Holding
+`C/SPC` for more than 200 ms gives Ctrl, not a space.
+
+Host-side bindings that assume this keymap live in the dotfiles: sway
+`$mod+grave` (drop-down terminal), `$mod+comma`/`period`/`Tab` (workspace
+prev/next/back), zellij `Alt+=`/`Alt+;` (resize — `+`/`-` share a finger with
+Alt).
+
 ## Building
 
 ```sh
