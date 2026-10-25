@@ -133,6 +133,11 @@ and uploads the firmware artifacts. `workflow_dispatch` accepts a `zmk_rev`
 input to build against ZMK main or any commit. Each submodule additionally has
 its own workflow based on ZMK's `build-user-config.yml`.
 
+`.github/workflows/ci.yml` runs `make lint` (pre-commit: yaml, actionlint,
+gitleaks, renovate config) on every push and pull request. Renovate bumps the
+actions weekly and moves each submodule to the head of its branch in a PR per
+keyboard; the build workflow on that PR is the test.
+
 ## Notes
 
 - The `mriya` board exists in two formats: `config/boards/arm/mriya` (legacy,

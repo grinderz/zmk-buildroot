@@ -271,3 +271,11 @@ push-all: push
 	@git add $(SUBMODULES) && \
 	if git diff --cached --quiet; then echo "root: nothing to commit"; \
 	else git commit -q -m "$(MSG)" && git push -q && echo "root: pushed"; fi
+
+# --- lint: the umbrella itself, not the firmware ---
+PRE_COMMIT_VERSION ?= 4.7
+PRE_COMMIT ?= uvx pre-commit@$(PRE_COMMIT_VERSION)
+
+.PHONY: lint
+lint:
+	$(PRE_COMMIT) run --all-files

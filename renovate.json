@@ -1,0 +1,31 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": ["config:recommended"],
+  "timezone": "Europe/Istanbul",
+  "schedule": ["before 9am on saturday"],
+  "dependencyDashboard": true,
+  "semanticCommits": "enabled",
+  "semanticCommitType": "chore",
+  "semanticCommitScope": "deps",
+  "labels": ["deps"],
+  "prConcurrentLimit": 5,
+  "enabledManagers": ["github-actions", "git-submodules", "pre-commit"],
+  "git-submodules": {
+    "enabled": true
+  },
+  "pre-commit": {
+    "enabled": true
+  },
+  "packageRules": [
+    {
+      "description": "Each keyboard config tracks its branch (.gitmodules); one PR per submodule, the build matrix on the PR is the test",
+      "matchManagers": ["git-submodules"],
+      "semanticCommitScope": "{{depName}}"
+    },
+    {
+      "description": "Tooling pins (pre-commit hooks) in their own PR",
+      "matchManagers": ["pre-commit"],
+      "groupName": "pre-commit hooks"
+    }
+  ]
+}
